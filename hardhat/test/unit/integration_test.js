@@ -154,4 +154,14 @@ describe("Data DAO System", function () {
         proposalState = await governor.state(proposalId)
         expect(proposalState).to.equal(7);
     });
+    it("Users can purchase tokens on a predefined price set by admin role", async function () {
+        const { token, owner, user1 } = await loadFixture(
+            deployDataDAOFixture
+        )
+        const priceInEther = 10;
+        await token.connect(owner).setSalesSettings(owner.address, priceInEther)
+        await token.connect(user1).purchaseTokens({value: ethers.utils.parseEther("21.45")})
+        const user1Balance = await token.balanceOf(user1.address)
+        expect(user1Balance).to.equal( ethers.utils.parseEther("2.145"))
+    })
 })
