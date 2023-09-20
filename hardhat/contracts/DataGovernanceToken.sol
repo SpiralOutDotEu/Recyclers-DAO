@@ -24,6 +24,8 @@ contract DataGovernanceToken is
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
     uint256 public tokenPriceInEther = 10 ether;
     address public paymentReceiver;
+    // Mapping to track the staked balances of users
+    mapping(address => uint256) public stakedBalances;
 
     constructor() ERC20("PackDataToken", "PDK") ERC20Permit("PackDataToken") {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
@@ -34,21 +36,51 @@ contract DataGovernanceToken is
         _mint(msg.sender, 100 ether);
     }
 
-     function purchaseTokens() external payable {
+    function purchaseTokens() external payable {
         require(msg.value > 0, "Amount must be greater than 0");
         require(tokenPriceInEther > 0, "Sale not set");
-        
-        uint256 tokenAmount =  (msg.value * (10 ** uint256(decimals()))) / tokenPriceInEther;
+
+        uint256 tokenAmount = (msg.value * (10 ** uint256(decimals()))) / tokenPriceInEther;
         require(tokenAmount > 0, "Insufficient Payment");
 
         _mint(msg.sender, tokenAmount);
         payable(paymentReceiver).transfer(msg.value);
     }
 
-    function setSalesSettings(address _receiver, uint256 _tokenPriceInEther ) external onlyRole(ADMIN_ROLE) {
+    function setSalesSettings(address _receiver, uint256 _tokenPriceInEther) external onlyRole(ADMIN_ROLE) {
         paymentReceiver = _receiver;
-        tokenPriceInEther = _tokenPriceInEther *10**decimals();
+        tokenPriceInEther = _tokenPriceInEther * 10 ** decimals();
     }
+
+    // Function to stake tokens
+    function stakeTokens(uint256 _amount) external {
+        require(_amount > 0, "Stake more than 0");
+        require(balanceOf(msg.sender) >= _amount, "Insufficient balance");
+
+        // Transfer tokens from the user to the contract
+        transfer(address(this), _amount);
+
+        // Update the staked balance of the user
+        stakedBalances[msg.sender] += _amount;
+    }
+
+    // Function to get the staked balance of a user
+    function getStakedBalance(address _user) external view returns (uint256) {
+        return stakedBalances[_user];
+    }
+
+    // Function to decrease staked tokens
+    function decreaseStake(uint256 _amount) external {
+        require(_amount > 0, "Decrease more than 0");
+        require(stakedBalances[msg.sender] >= _amount, "Insufficient staked balance");
+
+        // Transfer tokens from the contract back to the user
+        _transfer(address(this), msg.sender, _amount);
+
+        // Update the staked balance of the user
+        stakedBalances[msg.sender] -= _amount;
+    }
+
     function snapshot() public onlyRole(SNAPSHOT_ROLE) {
         _snapshot();
     }

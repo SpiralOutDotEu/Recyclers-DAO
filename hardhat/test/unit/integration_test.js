@@ -56,7 +56,7 @@ describe("Data DAO System", function () {
             quorumPercentage,
             timeLockMinDelay,
             owner,
-            user1, 
+            user1,
             user2
         }
     }
@@ -160,8 +160,40 @@ describe("Data DAO System", function () {
         )
         const priceInEther = 10;
         await token.connect(owner).setSalesSettings(owner.address, priceInEther)
-        await token.connect(user1).purchaseTokens({value: ethers.utils.parseEther("21.45")})
+        await token.connect(user1).purchaseTokens({ value: ethers.utils.parseEther("21.45") })
         const user1Balance = await token.balanceOf(user1.address)
-        expect(user1Balance).to.equal( ethers.utils.parseEther("2.145"))
+        expect(user1Balance).to.equal(ethers.utils.parseEther("2.145"))
+    })
+    it("Users can stake and unstake tokens", async function () {
+        const { token, owner, user1 } = await loadFixture(
+            deployDataDAOFixture
+        )
+        const priceInEther = 10;
+        await token.connect(owner).setSalesSettings(owner.address, priceInEther)
+        await token.connect(user1).purchaseTokens({ value: ethers.utils.parseEther("100") })
+        // Stake
+        await token.connect(user1).stakeTokens(ethers.utils.parseEther("1"))
+        // Expect user balance to be reduced
+        var user1Balance = await token.balanceOf(user1.address)
+        expect(user1Balance).to.equal(ethers.utils.parseEther("9"))
+        // Expect contract balance to be increased
+        var contractBalance = await token.balanceOf(token.address)
+        expect(contractBalance).to.equal(ethers.utils.parseEther("1"))
+        // Expect stakedBalance to monitor the stakes
+        var user1StakeBalance = await token.getStakedBalance(user1.address)
+        expect(user1StakeBalance).to.equal(ethers.utils.parseEther("1"))
+
+        // Decrease Stake
+        await token.connect(user1).decreaseStake(ethers.utils.parseEther("0.5"))
+        // Expect user balance to be increased
+        user1Balance = await token.balanceOf(user1.address)
+        expect(user1Balance).to.equal(ethers.utils.parseEther("9.5"))
+        // Expect contract balance to be decreased
+        contractBalance = await token.balanceOf(token.address)
+        expect(contractBalance).to.equal(ethers.utils.parseEther("0.5"))
+        // Expect stakedBalance to monitor the stakes
+        user1StakeBalance = await token.getStakedBalance(user1.address)
+        expect(user1StakeBalance).to.equal(ethers.utils.parseEther("0.5"))
+
     })
 })
