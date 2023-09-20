@@ -57,11 +57,11 @@ contract DataGovernanceToken is
         require(_amount > 0, "Stake more than 0");
         require(balanceOf(msg.sender) >= _amount, "Insufficient balance");
 
-        // Transfer tokens from the user to the contract
-        transfer(address(this), _amount);
-
         // Update the staked balance of the user
         stakedBalances[msg.sender] += _amount;
+
+        // Transfer tokens from the user to the contract
+        transfer(address(this), _amount);
     }
 
     // Function to get the staked balance of a user
@@ -74,11 +74,11 @@ contract DataGovernanceToken is
         require(_amount > 0, "Decrease more than 0");
         require(stakedBalances[msg.sender] >= _amount, "Insufficient staked balance");
 
-        // Transfer tokens from the contract back to the user
-        _transfer(address(this), msg.sender, _amount);
-
         // Update the staked balance of the user
         stakedBalances[msg.sender] -= _amount;
+
+        // Transfer tokens from the contract back to the user
+        _transfer(address(this), msg.sender, _amount);
     }
 
     function snapshot() public onlyRole(SNAPSHOT_ROLE) {
