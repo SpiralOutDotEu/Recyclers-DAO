@@ -196,4 +196,19 @@ describe("Data DAO System", function () {
         expect(user1StakeBalance).to.equal(ethers.utils.parseEther("0.5"))
 
     })
+    it("Users with Stake amount over submit minimum can submit an image with data", async function () {
+        const { token, owner, user1: submitter, user2: validator } = await loadFixture(
+            deployDataDAOFixture
+        )
+        const priceInEther = 1;
+        await token.connect(owner).setSalesSettings(owner.address, priceInEther);
+        const submitMinimum = "10";
+        const validateMinimum = "100";
+        await token.connect(owner).setLimits(submitMinimum, validateMinimum);
+        await token.connect(submitter).purchaseTokens({ value: ethers.utils.parseEther(submitMinimum) })
+        await token.connect(submitter).stakeTokens(ethers.utils.parseEther(submitMinimum))
+
+
+        
+    })
 })

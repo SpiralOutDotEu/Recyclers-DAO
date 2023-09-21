@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.18;
 
 import {ERC20Votes} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol";
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
@@ -8,6 +8,10 @@ import {ERC20Snapshot} from "@openzeppelin/contracts/token/ERC20/extensions/ERC2
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 import {Pausable} from "@openzeppelin/contracts/security/Pausable.sol";
 import {ERC20Permit} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol";
+import {ERC721Holder} from "@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol";
+import {TablelandDeployments} from "@tableland/evm/contracts/utils/TablelandDeployments.sol";
+import {SQLHelpers} from "@tableland/evm/contracts/utils/SQLHelpers.sol";
+import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 
 contract DataGovernanceToken is
     ERC20,
@@ -16,16 +20,31 @@ contract DataGovernanceToken is
     AccessControl,
     Pausable,
     ERC20Permit,
-    ERC20Votes
+    ERC20Votes,
+    ERC721Holder
 {
     bytes32 public constant SNAPSHOT_ROLE = keccak256("SNAPSHOT_ROLE");
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
+    // Sales settings
     uint256 public tokenPriceInEther = 10 ether;
     address public paymentReceiver;
+    // Submission and validation settings
+    uint256 public submitMinimum;
+    uint256 public validateMinimum;
+    // Table settings
+    uint256 public _tableId;
+    string private constant _TABLE_PREFIX = "recyclers_dao_table";
+    // Storage of submissions
+    mapping(string submissionId => address submitter) public submissions;
     // Mapping to track the staked balances of users
-    mapping(address => uint256) public stakedBalances;
+    mapping(address staker => uint256 amount) public stakedBalances;
+    // Events
+
+    event DataSubmission(string submissionId, address submitter);
+    event DataApproval(string submissionId, address submitter, address validator);
+    event DataRejection(string submissionId, address submitter, address validator);
 
     constructor() ERC20("PackDataToken", "PDK") ERC20Permit("PackDataToken") {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
@@ -33,7 +52,25 @@ contract DataGovernanceToken is
         _grantRole(PAUSER_ROLE, msg.sender);
         _grantRole(MINTER_ROLE, msg.sender);
         _grantRole(ADMIN_ROLE, msg.sender);
-        _mint(msg.sender, 100 ether);
+        _mint(msg.sender, 10000 ether);
+
+        _tableId = TablelandDeployments.get().create(
+            address(this),
+            SQLHelpers.toCreateFromSchema(
+                "id string primary key," // Notice the trailing comma
+                "imageCid text," //  the cid that the image is stored
+                "material text," // e.g. paper, plastic, metal, aluminum, mixed
+                "state text," // 'New' or 'Waste'
+                "brand text," // the brand of the product
+                "barcode text," // the barcode of product
+                "submitTimestamp text," // the block timestamp that has been submitted
+                "submitter text," // the address of the submitter
+                "validator text," // the address of the validator
+                "validationTimestamp text," // the block timestamp that has been checked by validator
+                "vote integer", // 1 if validator approves data, 0 if not
+                _TABLE_PREFIX
+            )
+        );
     }
 
     function purchaseTokens() external payable {
@@ -50,6 +87,83 @@ contract DataGovernanceToken is
     function setSalesSettings(address _receiver, uint256 _tokenPriceInEther) external onlyRole(ADMIN_ROLE) {
         paymentReceiver = _receiver;
         tokenPriceInEther = _tokenPriceInEther * 10 ** decimals();
+    }
+
+    function setLimits(uint256 _submitMinimum, uint256 _validateMinimum) external onlyRole(ADMIN_ROLE) {
+        submitMinimum = _submitMinimum * 10 ** decimals();
+        validateMinimum = _validateMinimum * 10 ** decimals();
+    }
+
+    // Return the table name
+    function getTable() public view returns (string memory) {
+        return SQLHelpers.toNameFromId(_TABLE_PREFIX, _tableId);
+    }
+
+    function submitData(
+        string memory imageCid,
+        string memory material,
+        string memory state,
+        string memory brand,
+        string memory barcode
+    ) public {
+        require(stakedBalances[msg.sender] >= submitMinimum, "Staked < SubmissionMin");
+        string memory id =
+            string(abi.encodePacked(keccak256(abi.encodePacked(msg.sender, imageCid, material, state, brand, barcode))));
+        // Store to table
+        TablelandDeployments.get().mutate(
+            address(this),
+            _tableId,
+            SQLHelpers.toInsert(
+                _TABLE_PREFIX,
+                _tableId,
+                "id,imageCid,material,state,brand,barcode,submitTimestamp,submitter",
+                string.concat(
+                    SQLHelpers.quote(id),
+                    ",",
+                    SQLHelpers.quote(imageCid),
+                    ",",
+                    SQLHelpers.quote(material),
+                    ",",
+                    SQLHelpers.quote(state),
+                    ",",
+                    SQLHelpers.quote(brand),
+                    ",",
+                    SQLHelpers.quote(barcode),
+                    ",",
+                    // solhint-disable-next-line not-rely-on-time
+                    Strings.toString(uint256(block.timestamp)), // Convert to a string
+                    ",",
+                    SQLHelpers.quote(Strings.toHexString(msg.sender)) // Wrap strings in single quotes
+                )
+            )
+        );
+        // Store reference to contract
+        submissions[id] = msg.sender;
+        // Emit event
+        emit DataSubmission(id, msg.sender);
+    }
+
+    function validateData(string memory submissionId, bool vote) public {
+        require(stakedBalances[msg.sender] >= validateMinimum, "Staked < validateMinimum");
+        // Set values to update
+        string memory setters = string.concat(
+            "validator=",
+            SQLHelpers.quote(Strings.toHexString(msg.sender)),
+            ",",
+            "validationTimestamp=",
+            Strings.toString(uint256(block.timestamp)),
+            ",",
+            "vote=",
+            vote ? "1" : "0"
+        );
+        // Only update the row with the matching `id`
+        string memory filters = string.concat("id=", submissionId);
+        /*  Under the hood, SQL helpers formulates:
+        *  UPDATE {prefix}_{chainId}_{tableId} SET val=<myVal> WHERE id=<id>
+        */
+        TablelandDeployments.get().mutate(
+            address(this), _tableId, SQLHelpers.toUpdate(_TABLE_PREFIX, _tableId, setters, filters)
+        );
     }
 
     // Function to stake tokens
