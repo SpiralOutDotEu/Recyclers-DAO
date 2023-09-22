@@ -2,9 +2,15 @@
 // components/Navbar.js
 import { useState } from 'react';
 import Link from 'next/link';
+import ConnectWallet from '../ConnectWallet';
 
 const Navbar = () => {
     const [isOpen, setIsOpen] = useState(false);
+    const [isWalletConnected, setWalletConnected] = useState(false);
+
+    const handleWalletConnect = (status) => {
+      setWalletConnected(status);
+    };
 
     const toggleMenu = () => {
         setIsOpen(!isOpen);
@@ -13,7 +19,7 @@ const Navbar = () => {
     return (
         <nav className="bg-blue-500 p-4">
             <div className="container mx-auto flex justify-between items-center">
-                <div className="flex items-center space-x-4 text-white text-xl font-bold">
+                <div className="flex items-center space-x-4 text-white text-3xl font-bold">
                     <Link href="/">
                         Recyclers DAO
                     </Link>
@@ -52,7 +58,7 @@ const Navbar = () => {
 
                 </div>
                 {/* Desktop menu */}
-                <ul className="hidden md:flex space-x-4 text-white">
+                <ul className="hidden md:flex space-x-4 text-white items-center text-lg">
                     <li>
                         <Link href="/">
                             Home
@@ -63,7 +69,10 @@ const Navbar = () => {
                             Dashboard
                         </Link>
                     </li>
-                    
+                    <li>
+                        <ConnectWallet  onWalletConnect={handleWalletConnect}/>
+                    </li>
+
                 </ul>
             </div>
             {isOpen && (
@@ -74,6 +83,7 @@ const Navbar = () => {
                     <Link href="/dashboard">
                         Dashboard
                     </Link>
+                    <ConnectWallet onWalletConnect={handleWalletConnect} />
                 </div>
             )}
         </nav>
