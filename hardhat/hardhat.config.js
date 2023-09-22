@@ -38,6 +38,8 @@ module.exports = {
         Calibration: {
             chainId: 314159,
             url: "https://api.calibration.node.glif.io/rpc/v1",
+            allowUnlimitedContractSize: true,
+            blockGasLimit: 339_477_658,
             accounts: [PRIVATE_KEY],
         },
         FilecoinMainnet: {

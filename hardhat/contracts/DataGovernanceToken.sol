@@ -84,12 +84,12 @@ contract DataGovernanceToken is
         payable(paymentReceiver).transfer(msg.value);
     }
 
-    function setSalesSettings(address _receiver, uint256 _tokenPriceInEther) external onlyRole(ADMIN_ROLE) {
+    function setSalesSettings(address _receiver, uint256 _tokenPriceInEther) public onlyRole(ADMIN_ROLE) {
         paymentReceiver = _receiver;
         tokenPriceInEther = _tokenPriceInEther * 10 ** decimals();
     }
 
-    function setLimits(uint256 _submitMinimum, uint256 _validateMinimum) external onlyRole(ADMIN_ROLE) {
+    function setLimits(uint256 _submitMinimum, uint256 _validateMinimum) public onlyRole(ADMIN_ROLE) {
         submitMinimum = _submitMinimum * 10 ** decimals();
         validateMinimum = _validateMinimum * 10 ** decimals();
     }
@@ -164,6 +164,14 @@ contract DataGovernanceToken is
         TablelandDeployments.get().mutate(
             address(this), _tableId, SQLHelpers.toUpdate(_TABLE_PREFIX, _tableId, setters, filters)
         );
+        if (vote) {
+            _mint(submissions[submissionId], 0.01 ether);
+            delete submissions[submissionId];
+            _mint(msg.sender, 0.01 ether);
+        } else {
+            stakedBalances[submissions[submissionId]] -= 0.01 ether;
+            stakedBalances[msg.sender] -= 0.01 ether;
+        }
     }
 
     // Function to stake tokens
