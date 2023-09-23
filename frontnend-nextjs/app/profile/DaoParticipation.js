@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import useToken from '../hooks/useToken';
 import { ethers } from 'ethers';
+import Loading from '../components/Loading';
 
 const DaoParticipation = () => {
   const [purchaseAmount, setPurchaseAmount] = useState(10);
@@ -56,6 +57,7 @@ const DaoParticipation = () => {
 
   return (
     <div className="p-4 bg-gray-100 rounded-lg shadow-lg center-items">
+      <Loading visible={loading} />
       <div className="bg-blue-100 p-4 mb-4">
         <p>
           To participate in the DAO and earn tokens, you need to stake 10 RDAO tokens. You can directly purchase and stake them below. The purchase price is {tokenPriceInEther} Ether.
