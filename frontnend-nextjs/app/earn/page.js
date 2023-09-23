@@ -15,19 +15,7 @@ const Earn = () => {
   const [contractInstance, setContractInstance] = useState(null);
 
   useEffect(() => {
-    // Initialize Web3 and connect to Ethereum network
-    async function initWeb3() {
-      if (typeof window.ethereum !== 'undefined') {
-        const _web3 = new Web3(window.ethereum);
-        await window.ethereum.enable(); // Request user's permission to connect
-        setWeb3(_web3);
 
-        const _contractInstance = new _web3.eth.Contract(contractABI, contractAddress);
-        setContractInstance(_contractInstance);
-      }
-    }
-
-    initWeb3();
   }, []);
 
   return (

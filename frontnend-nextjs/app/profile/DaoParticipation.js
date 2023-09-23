@@ -1,31 +1,17 @@
 import React, { useState, useEffect } from 'react';
+import useToken from '../hooks/useToken';
 
-const DaoParticipation = ({ tokenContract, onPurchase, onIncreaseStake, onDecreaseStake }) => {
+const DaoParticipation = () => {
   const [purchaseAmount, setPurchaseAmount] = useState(10);
   const [increaseAmount, setIncreaseAmount] = useState(0);
   const [decreaseAmount, setDecreaseAmount] = useState(0);
-  const [etherBalance, setEtherBalance] = useState(0);
+  const { ethereumBalance, stakedBalance, tokenPriceInEther } = useToken();
   const [rdaoBalance, setRdaoBalance] = useState(0);
   const [amountStaked, setAmountStaked] = useState(0);
-  const [purchasePriceInEther, setPurchasePriceInEther] = useState(0);
 
   useEffect(() => {
-    // Load balances and purchase price from the contract
-    const loadContractData = async () => {
-      // Use web3 or your contract API to fetch data
-      const etherBalance = await tokenContract.getEtherBalance();
-      const rdaoBalance = await tokenContract.getRdaoBalance();
-      const amountStaked = await tokenContract.getAmountStaked();
-      const purchasePriceInEther = await tokenContract.getPurchasePrice();
-
-      setEtherBalance(etherBalance);
-      setRdaoBalance(rdaoBalance);
-      setAmountStaked(amountStaked);
-      setPurchasePriceInEther(purchasePriceInEther);
-    };
-
-    loadContractData();
-  }, [tokenContract]);
+    // You can load additional data here if needed
+  }, [ethereumBalance, stakedBalance, tokenPriceInEther]);
 
   const handlePurchase = () => {
     // Call the token contract to purchase RDAO tokens
@@ -46,15 +32,14 @@ const DaoParticipation = ({ tokenContract, onPurchase, onIncreaseStake, onDecrea
     <div className="p-4 bg-gray-100 rounded-lg shadow-lg center-items">
       <div className="bg-blue-100 p-4 mb-4">
         <p>
-          To participate in the DAO and earn tokens, you need to stake 10 RDAO tokens. You can directly purchase and stake them below. The purchase price is {purchasePriceInEther} Ether.
+          To participate in the DAO and earn tokens, you need to stake 10 RDAO tokens. You can directly purchase and stake them below. The purchase price is {tokenPriceInEther} Ether.
         </p>
       </div>
-      <p>Your balance is {etherBalance} Ether and {rdaoBalance} RDAO.</p>
       <div className="mb-4">
-      <p className="text-lg font-semibold">
+        <p className="text-lg font-semibold">
           Your Balances
         </p>
-        <p>Your balance is {etherBalance} Ether and {rdaoBalance} RDAO.</p>
+        <p>Your balance is {ethereumBalance} Ether and {stakedBalance} RDAO.</p>
       </div>
       <div className="mb-4">
         <label className="block mb-2 font-semibold">Your Purchase Amount:</label>
@@ -72,7 +57,7 @@ const DaoParticipation = ({ tokenContract, onPurchase, onIncreaseStake, onDecrea
       </div>
       <div className="mb-4">
         <p className="text-lg font-semibold">Your Staked Amount</p>
-        <p>Your staked amount is {amountStaked} RDAO.</p>
+        <p>Your staked amount is {stakedBalance} RDAO.</p>
         <div className="flex space-x-2">
           <div>
             <label className="block mb-2 font-semibold">Increase Stake:</label>
