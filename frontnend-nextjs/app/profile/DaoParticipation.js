@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import useToken from '../hooks/useToken';
+import { ethers } from 'ethers';
 
 const DaoParticipation = () => {
   const [purchaseAmount, setPurchaseAmount] = useState(10);
   const [increaseAmount, setIncreaseAmount] = useState(0);
   const [decreaseAmount, setDecreaseAmount] = useState(0);
-  const { ethereumBalance, stakedBalance, tokenPriceInEther } = useToken();
+  const { ethereumBalance, stakedBalance, unStakedBalance,
+    tokenPriceInEther, loading, error,
+    stakeTokens, decreaseStake, purchaseTokens } = useToken();
   const [rdaoBalance, setRdaoBalance] = useState(0);
   const [amountStaked, setAmountStaked] = useState(0);
 
@@ -14,8 +17,31 @@ const DaoParticipation = () => {
   }, [ethereumBalance, stakedBalance, tokenPriceInEther]);
 
   const handlePurchase = () => {
-    // Call the token contract to purchase RDAO tokens
-    onPurchase(purchaseAmount);
+    if (window.ethereum == null) {
+      setError("No Browser wallet detected");
+      alert("You need an ethereum wallet")
+      return
+
+    } else {
+
+      const provider = new ethers.BrowserProvider(window.ethereum)
+
+      // Convert purchaseAmount to Wei (assuming purchaseAmount is in Ether)
+      const amountInWei = ethers.parseEther(purchaseAmount.toString());
+
+      // Ensure the tokenPriceInEther is valid
+      if (tokenPriceInEther <= 0) {
+        setError("Sale not set");
+        return;
+      }
+
+      // Calculate the tokenAmount based on the provided amount and tokenPriceInEther
+      const tokenPriceInEth = ethers.parseUnits(tokenPriceInEther, "ether")
+      const tokenAmount = (amountInWei * BigInt(10 ** 18)) / (tokenPriceInEth);
+
+      // Call the purchaseTokens function with the calculated tokenAmount
+      purchaseTokens(tokenAmount, provider);
+    }
   };
 
   const handleIncreaseStake = () => {
@@ -39,7 +65,7 @@ const DaoParticipation = () => {
         <p className="text-lg font-semibold">
           Your Balances
         </p>
-        <p>Your balance is {ethereumBalance} Ether and {stakedBalance} RDAO.</p>
+        <p>Your balance is {ethereumBalance} Ether and {unStakedBalance} RDAO.</p>
       </div>
       <div className="mb-4">
         <label className="block mb-2 font-semibold">Your Purchase Amount:</label>
