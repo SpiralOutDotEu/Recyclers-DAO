@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
+import ValidationModal from './ValidationModal'; // Import your modal component
 
 const TableComponent = ({ tableName }) => {
   const [tableData, setTableData] = useState([]);
+  const [selectedRowData, setSelectedRowData] = useState(null);
 
   useEffect(() => {
     // Fetch table data based on the provided table name
@@ -22,10 +24,15 @@ const TableComponent = ({ tableName }) => {
       });
   }, [tableName]);
 
+  // Handle row click event
+  const handleRowClick = (row) => {
+    setSelectedRowData(row);
+  };
+
   // Render the table with the fetched data
   return (
     <div className="overflow-x-auto overflow-y-auto">
-      <h2 className="text-2xl font-semibold mb-4">{tableName} Table</h2>
+      <h3 className="text-sm mb-4">{tableName} Table</h3>
       <table className="table-auto min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
           <tr>
@@ -43,7 +50,11 @@ const TableComponent = ({ tableName }) => {
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
           {tableData.map((row, index) => (
-            <tr key={index}>
+            <tr
+              key={index}
+              onClick={() => handleRowClick(row)} // Handle row click
+              className="cursor-pointer hover:bg-gray-100"
+            >
               {Object.values(row).map((value, colIndex) => (
                 <td
                   key={colIndex}
@@ -56,6 +67,14 @@ const TableComponent = ({ tableName }) => {
           ))}
         </tbody>
       </table>
+
+      {/* Render RowDetailsModal when selectedRowData is not null */}
+      {selectedRowData && (
+        <ValidationModal
+          rowData={selectedRowData}
+          onClose={() => setSelectedRowData(null)} // Close modal when needed
+        />
+      )}
     </div>
   );
 };
