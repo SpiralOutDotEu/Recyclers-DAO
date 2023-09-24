@@ -37,16 +37,18 @@ contract DataGovernanceToken is
     uint256 public _tableId;
     string private constant _TABLE_PREFIX = "recyclers_dao_table";
     // Storage of submissions
-    mapping(string submissionId => address submitter) public submissions;
+    mapping(uint256 submissionId => address submitter) public submissions;
     // Mapping to track the staked balances of users
     mapping(address staker => uint256 amount) public stakedBalances;
+    // Counter
+    uint256 public counter = 1;
     // Events
 
-    event DataSubmission(string submissionId, address submitter);
-    event DataApproval(string submissionId, address submitter, address validator);
-    event DataRejection(string submissionId, address submitter, address validator);
+    event DataSubmission(uint256 submissionId, address submitter);
+    event DataApproval(uint256 submissionId, address submitter, address validator,string comment);
+    event DataRejection(uint256 submissionId, address submitter, address validator, string reason);
 
-    constructor() ERC20("PackDataToken", "PDK") ERC20Permit("PackDataToken") {
+    constructor() ERC20("Recyclers DAO Token", "ReDAO") ERC20Permit("Recyclers DAO Token") {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(SNAPSHOT_ROLE, msg.sender);
         _grantRole(PAUSER_ROLE, msg.sender);
@@ -57,17 +59,17 @@ contract DataGovernanceToken is
         _tableId = TablelandDeployments.get().create(
             address(this),
             SQLHelpers.toCreateFromSchema(
-                "id string primary key," // Notice the trailing comma
-                "imageCid text," //  the cid that the image is stored
+                "id integer primary key," // Notice the trailing comma
+                "imagecid text," //  the cid that the image is stored
                 "material text," // e.g. paper, plastic, metal, aluminum, mixed
                 "state text," // 'New' or 'Waste'
                 "brand text," // the brand of the product
                 "barcode text," // the barcode of product
-                "submitTimestamp text," // the block timestamp that has been submitted
+                "submittimestamp text," // the block timestamp that has been submitted
                 "submitter text," // the address of the submitter
                 "validator text," // the address of the validator
-                "validationTimestamp text," // the block timestamp that has been checked by validator
-                "vote integer", // 1 if validator approves data, 0 if not
+                "validationtimestamp text," // the block timestamp that has been checked by validator
+                "vote int", // 1 if validator approves data, 0 if not
                 _TABLE_PREFIX
             )
         );
@@ -107,8 +109,7 @@ contract DataGovernanceToken is
         string memory barcode
     ) public {
         require(stakedBalances[msg.sender] >= submitMinimum, "Staked < SubmissionMin");
-        string memory id =
-            string(abi.encodePacked(keccak256(abi.encodePacked(msg.sender, imageCid, material, state, brand, barcode))));
+
         // Store to table
         TablelandDeployments.get().mutate(
             address(this),
@@ -116,10 +117,8 @@ contract DataGovernanceToken is
             SQLHelpers.toInsert(
                 _TABLE_PREFIX,
                 _tableId,
-                "id,imageCid,material,state,brand,barcode,submitTimestamp,submitter",
+                "imagecid,material,state,brand,barcode,submittimestamp,submitter",
                 string.concat(
-                    SQLHelpers.quote(id),
-                    ",",
                     SQLHelpers.quote(imageCid),
                     ",",
                     SQLHelpers.quote(material),
@@ -131,33 +130,36 @@ contract DataGovernanceToken is
                     SQLHelpers.quote(barcode),
                     ",",
                     // solhint-disable-next-line not-rely-on-time
-                    Strings.toString(uint256(block.timestamp)), // Convert to a string
+                    SQLHelpers.quote(Strings.toString(uint256(block.timestamp))), // Convert to a string
                     ",",
                     SQLHelpers.quote(Strings.toHexString(msg.sender)) // Wrap strings in single quotes
                 )
             )
         );
+
         // Store reference to contract
-        submissions[id] = msg.sender;
+        submissions[counter] = msg.sender;
+      
         // Emit event
-        emit DataSubmission(id, msg.sender);
+        emit DataSubmission(counter, msg.sender);
+          counter += 1;
     }
 
-    function validateData(string memory submissionId, bool vote) public {
+    function validateData(uint256 submissionId, bool vote, string calldata comment) public {
         require(stakedBalances[msg.sender] >= validateMinimum, "Staked < validateMinimum");
         // Set values to update
         string memory setters = string.concat(
             "validator=",
             SQLHelpers.quote(Strings.toHexString(msg.sender)),
             ",",
-            "validationTimestamp=",
-            Strings.toString(uint256(block.timestamp)),
+            "validationtimestamp=",
+            SQLHelpers.quote(Strings.toString(uint256(block.timestamp))),
             ",",
             "vote=",
             vote ? "1" : "0"
         );
         // Only update the row with the matching `id`
-        string memory filters = string.concat("id=", submissionId);
+        string memory filters = string.concat("id=", Strings.toString(submissionId));
         /*  Under the hood, SQL helpers formulates:
         *  UPDATE {prefix}_{chainId}_{tableId} SET val=<myVal> WHERE id=<id>
         */
@@ -168,9 +170,12 @@ contract DataGovernanceToken is
             _mint(submissions[submissionId], 0.01 ether);
             delete submissions[submissionId];
             _mint(msg.sender, 0.01 ether);
+            emit DataApproval(submissionId, submissions[submissionId], msg.sender, comment);
+
         } else {
             stakedBalances[submissions[submissionId]] -= 0.01 ether;
             stakedBalances[msg.sender] -= 0.01 ether;
+            emit DataRejection(submissionId, submissions[submissionId], msg.sender, comment);
         }
     }
 

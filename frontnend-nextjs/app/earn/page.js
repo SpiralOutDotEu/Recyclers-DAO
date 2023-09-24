@@ -1,18 +1,15 @@
 
 "use client"
 import React, { useEffect, useState } from 'react';
-import Web3 from 'web3'; // Import the Web3 library or Ethereum library of your choice
 import ProductForm from './ProductForm';
-
+import Tableland from './TableLand';
+import useToken from '../hooks/useToken';
 
 // Load Ethereum contract ABI and create a contract instance
-const contractABI = ""; // Replace with your contract's ABI
-const contractAddress = '0x...'; // Replace with your contract's address
 
 
 const Earn = () => {
-  const [web3, setWeb3] = useState(null);
-  const [contractInstance, setContractInstance] = useState(null);
+  const {table} = useToken();
 
   useEffect(() => {
 
@@ -49,6 +46,7 @@ const Earn = () => {
       <div className="bg-blue-100 md:w-1/2 p-4 rounded-lg">
         <h2 className="text-gray-800 text-xl font-semibold mb-2">Validate Data</h2>
         {/* Place your components for validating data here */}
+        <Tableland tableName= {table} />
       </div>
     </div>
   </div>

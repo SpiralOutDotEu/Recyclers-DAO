@@ -10,6 +10,7 @@ const useToken = () => {
     const [stakedBalance, setStakedBalance] = useState(null);
     const [unStakedBalance, setUnStakedBalance] = useState(null);
     const [tokenPriceInEther, setTokenPriceInEther] = useState(null);
+    const [table, setTable] = useState(null);
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
 
@@ -26,6 +27,9 @@ const useToken = () => {
             // Convert token price from Wei to Ether
             const tokenPriceEther = ethers.formatEther(tokenPriceWei);
             setTokenPriceInEther(tokenPriceEther);
+            // Fetch table 
+            const table = await tokenContract.getTable();
+            setTable(table);
         }
         fetchData();
     }, []);
@@ -112,6 +116,7 @@ const useToken = () => {
         stakedBalance,
         unStakedBalance,
         tokenPriceInEther,
+        table,
         error,
         loading,
         stakeTokens,
