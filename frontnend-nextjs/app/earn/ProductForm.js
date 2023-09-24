@@ -88,16 +88,27 @@ const ProductForm = () => {
                 </select>
             </div>
             <div className="mb-4">
-                <label className="block text-gray-700">Material Type:</label>
-                <div className="flex items-center">
-                    <span className="mr-2">New</span>
-                    <label className="switch">
-                        <input type="checkbox" checked={isNew} onChange={() => setIsNew(!isNew)} />
-                        <span className="slider round"></span>
-                    </label>
-                    <span className="ml-2">Waste</span>
-                </div>
-            </div>
+  <label className="block text-gray-700">Material Type:</label>
+  <div className="inline-block">
+    <div className="flex justify-between items-center">
+      <div className="flex items-center">
+        <span className="mr-2">New</span>
+        <label className="switch">
+          <input type="checkbox" checked={isNew} onChange={() => setIsNew(!isNew)} />
+          <span className="slider round"></span>
+        </label>
+      </div>
+      <div className="flex items-center">
+        <span className="mr-2">Waste</span>
+        <label className="switch">
+          <input type="checkbox" checked={!isNew} onChange={() => setIsNew(!isNew)} />
+          <span className="slider round"></span>
+        </label>
+      </div>
+    </div>
+  </div>
+</div>
+
             <button
                 onClick={handleSubmit}
                 className={`bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ${!isEthereumConnected ? 'cursor-not-allowed opacity-50' : ''}`}
