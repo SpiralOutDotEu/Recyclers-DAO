@@ -3,6 +3,7 @@ import useToken from '../hooks/useToken';
 import { ethers } from 'ethers';
 import Loading from '../components/Loading';
 import Success from '../components/Success'
+import Error from '../components/Error'
 
 const DaoParticipation = () => {
   const [purchaseAmount, setPurchaseAmount] = useState(10);
@@ -11,7 +12,8 @@ const DaoParticipation = () => {
   const { ethereumBalance, stakedBalance, unStakedBalance,
     tokenPriceInEther, loading, error,
     stakeTokens, decreaseStake, purchaseTokens } = useToken();
-  const [purchaseSuccess, setPurchaseSuccess] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(null);
+  const [showError, setShowError] = useState(null);
 
   useEffect(() => {
     // You can load additional data here if needed
@@ -40,21 +42,58 @@ const DaoParticipation = () => {
         const success = await purchaseTokens(amountInWei, userProvider);
         if (success) {
           // Set the purchase success state to true
-          setPurchaseSuccess(true);
+          setShowSuccess("Purchase Successful!");
+        } else {
+          setShowError("Error! something went wrong")
         }
+
       };
       onPurchase(tokenAmount, provider)
     }
   };
 
   const handleIncreaseStake = () => {
-    // Call the token contract to increase stake
-    onIncreaseStake(increaseAmount);
+    if (window.ethereum == null) {
+      setError("No Browser wallet detected");
+      alert("You need an ethereum wallet")
+      return
+    } else {
+      const provider = new ethers.BrowserProvider(window.ethereum)
+      // Convert purchaseAmount to Wei (assuming purchaseAmount is in Ether)
+      const amountInWei = ethers.parseEther(increaseAmount.toString());
+      // Call the purchaseTokens function with the calculated tokenAmount
+      const onIncreaseStake = async (amount, userProvider) => {
+        const success = await stakeTokens(amount, userProvider);
+        if (success) {
+          setShowSuccess("Staked Successful!");
+        } else {
+          setShowError("Error! something went wrong")
+        }
+      };
+      onIncreaseStake(amountInWei, provider);
+    }
   };
 
   const handleDecreaseStake = () => {
-    // Call the token contract to decrease stake
-    onDecreaseStake(decreaseAmount);
+    if (window.ethereum == null) {
+      setError("No Browser wallet detected");
+      alert("You need an ethereum wallet")
+      return
+    } else {
+      const provider = new ethers.BrowserProvider(window.ethereum)
+      // Convert purchaseAmount to Wei (assuming purchaseAmount is in Ether)
+      const amountInWei = ethers.parseEther(decreaseAmount.toString());
+      // Call the purchaseTokens function with the calculated tokenAmount
+      const onDecreaseStake = async (amount, userProvider) => {
+        const success = await decreaseStake(amount, userProvider);
+        if (success) {
+          setShowSuccess("Reduced stake Successful!");
+        } else {
+          setShowError("Error! something went wrong")
+        }
+      };
+      onDecreaseStake(amountInWei, provider);
+    }
   };
 
   return (
@@ -115,8 +154,11 @@ const DaoParticipation = () => {
           </div>
         </div>
       </div>
-      {purchaseSuccess && (
-        <Success message="Purchase successful!" onClose={() => setPurchaseSuccess(false)} />
+      {showSuccess && (
+        <Success message={showSuccess} onClose={() => setShowSuccess(false)} />
+      )}
+      {showError && (
+        <Error message={showError} onClose={() => setShowError(false)} />
       )}
     </div>
   );

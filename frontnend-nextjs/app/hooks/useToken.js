@@ -59,12 +59,14 @@ const useToken = () => {
     }, [walletAddress]);
 
     // Function to stake tokens
-    const stakeTokens = async (amountInWei) => {
+    const stakeTokens = async (amountInWei, userProvider) => {
         try {
             setLoading(true);
-            const tokenContract = new ethers.Contract(tokenAddress, tokenAbi, provider);
+            const signer = await userProvider.getSigner()
+            const tokenContract = new ethers.Contract(tokenAddress, tokenAbi, signer);
             const tx = await tokenContract.stakeTokens(amountInWei);
             await tx.wait(); // Wait for transaction confirmation
+            return true;
         } catch (error) {
             setError(error.message);
         } finally {
@@ -73,12 +75,14 @@ const useToken = () => {
     };
 
     // Function to decrease stake
-    const decreaseStake = async (amountInWei) => {
+    const decreaseStake = async (amountInWei, userProvider) => {
         try {
             setLoading(true);
-            const tokenContract = new ethers.Contract(tokenAddress, tokenAbi, provider);
+            const signer = await userProvider.getSigner()
+            const tokenContract = new ethers.Contract(tokenAddress, tokenAbi, signer);
             const tx = await tokenContract.decreaseStake(amountInWei);
             await tx.wait(); // Wait for transaction confirmation
+            return true;
         } catch (error) {
             setError(error.message);
         } finally {

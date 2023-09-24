@@ -1,6 +1,6 @@
 "use client"
 import React, { useEffect, useState } from 'react';
-import {AiOutlineCheck} from 'react-icons/ai'
+import {AiOutlineClose} from 'react-icons/ai'
 
 const Success = ({ message, onClose, autoCloseTime = 8000 }) => {
     const [isVisible, setIsVisible] = useState(true);
@@ -23,10 +23,10 @@ const Success = ({ message, onClose, autoCloseTime = 8000 }) => {
           isVisible ? 'visible' : 'invisible'
         }`}
       >
-        <div className="bg-green-400  bg-opacity-80 p-6 rounded-lg shadow-lg text-white text-center">
-          <AiOutlineCheck size="4x" className="mb-4 text-green-700" />
+        <div className="bg-red-400  bg-opacity-80 p-6 rounded-lg shadow-lg text-white text-center">
+          <AiOutlineClose size="4x" className="mb-4 text-red-700" />
           <p className="text-lg font-semibold">{message}</p>
-          <button onClick={() => setIsVisible(false)} className="mt-4 bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">
+          <button onClick={() => setIsVisible(false)} className="mt-4 bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700">
             OK
           </button>
         </div>
