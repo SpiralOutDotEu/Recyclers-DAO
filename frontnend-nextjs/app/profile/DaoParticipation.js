@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import useToken from '../hooks/useToken';
 import { ethers } from 'ethers';
 import Loading from '../components/Loading';
+import Success from '../components/Success'
 
 const DaoParticipation = () => {
   const [purchaseAmount, setPurchaseAmount] = useState(10);
@@ -10,38 +11,39 @@ const DaoParticipation = () => {
   const { ethereumBalance, stakedBalance, unStakedBalance,
     tokenPriceInEther, loading, error,
     stakeTokens, decreaseStake, purchaseTokens } = useToken();
-  const [rdaoBalance, setRdaoBalance] = useState(0);
-  const [amountStaked, setAmountStaked] = useState(0);
+  const [purchaseSuccess, setPurchaseSuccess] = useState(false);
 
   useEffect(() => {
     // You can load additional data here if needed
   }, [ethereumBalance, stakedBalance, tokenPriceInEther]);
+
 
   const handlePurchase = () => {
     if (window.ethereum == null) {
       setError("No Browser wallet detected");
       alert("You need an ethereum wallet")
       return
-
     } else {
-
       const provider = new ethers.BrowserProvider(window.ethereum)
-
       // Convert purchaseAmount to Wei (assuming purchaseAmount is in Ether)
       const amountInWei = ethers.parseEther(purchaseAmount.toString());
-
       // Ensure the tokenPriceInEther is valid
       if (tokenPriceInEther <= 0) {
         setError("Sale not set");
         return;
       }
-
       // Calculate the tokenAmount based on the provided amount and tokenPriceInEther
       const tokenPriceInEth = ethers.parseUnits(tokenPriceInEther, "ether")
       const tokenAmount = (amountInWei * BigInt(10 ** 18)) / (tokenPriceInEth);
-
       // Call the purchaseTokens function with the calculated tokenAmount
-      purchaseTokens(tokenAmount, provider);
+      const onPurchase = async (amountInWei, userProvider) => {
+        const success = await purchaseTokens(amountInWei, userProvider);
+        if (success) {
+          // Set the purchase success state to true
+          setPurchaseSuccess(true);
+        }
+      };
+      onPurchase(tokenAmount, provider)
     }
   };
 
@@ -113,6 +115,9 @@ const DaoParticipation = () => {
           </div>
         </div>
       </div>
+      {purchaseSuccess && (
+        <Success message="Purchase successful!" onClose={() => setPurchaseSuccess(false)} />
+      )}
     </div>
   );
 };

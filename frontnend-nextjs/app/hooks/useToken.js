@@ -3,6 +3,7 @@ import { useWallet } from '../contexts/WalletContext';
 import { tokenAddress, tokenAbi, customRpcUrl } from './constants';
 import { ethers } from 'ethers';
 
+
 const useToken = () => {
     const { walletAddress } = useWallet();
     const [ethereumBalance, setEthereumBalance] = useState(null);
@@ -93,6 +94,8 @@ const useToken = () => {
             const tokenContract = new ethers.Contract(tokenAddress, tokenAbi, signer);
             const tx = await tokenContract.purchaseTokens({ value: amountInWei });
             await tx.wait(); // Wait for transaction confirmation
+            return true;
+
         } catch (error) {
             setError(error.message);
         } finally {

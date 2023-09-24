@@ -1,0 +1,28 @@
+.success-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: #4caf50; /* Background color for success message */
+    color: #fff; /* Text color */
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+    z-index: 1000; /* Ensure it's on top of other elements */
+  }
+  
+  .success-message {
+    flex: 1;
+    padding: 10px;
+  }
+  
+  .close-button {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 20px;
+    cursor: pointer;
+  }
+  
