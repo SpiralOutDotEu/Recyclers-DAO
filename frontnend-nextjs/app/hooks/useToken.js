@@ -30,6 +30,7 @@ const useToken = () => {
             // Fetch table 
             const table = await tokenContract.getTable();
             setTable(table);
+            setLoading(false);
         }
         fetchData();
     }, []);
