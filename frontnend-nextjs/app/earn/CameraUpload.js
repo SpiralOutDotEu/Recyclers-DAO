@@ -3,7 +3,7 @@ import Webcam from 'react-webcam';
 import { Web3Storage } from 'web3.storage';
 import lighthouse from '@lighthouse-web3/sdk';
 
-const CameraUpload = ({ apiKey, onUpload }) => {
+const CameraUpload = ({ onUpload }) => {
     const [capturedImage, setCapturedImage] = useState(null);
     const [isPreview, setIsPreview] = useState(false);
     const [storedSelectedProvider, setStoredSelectedProvider] = useState(null);
@@ -43,18 +43,7 @@ const CameraUpload = ({ apiKey, onUpload }) => {
     const uploadImage = async () => {
         if (capturedImage) {
             const filename = generateUniqueName();
-            // const buffer = Buffer.from(capturedImage, 'base64');
             try {
-                // require('http').request({ capturedImage, encoding: null }, (err, resp, buffer) => {
-                //     lighthouse.uploadBuffer(buffer, storedLighthouseApiKey).then(res => {
-                //         onUpload(uploadResponse);
-                //     })
-
-                    // Use the buffer
-                    // buffer contains the image data
-                    // typeof buffer === 'object'
-                // });
-
                 fetch(capturedImage)
                     .then(res => res.blob())
                     .then(blob => {
@@ -63,10 +52,7 @@ const CameraUpload = ({ apiKey, onUpload }) => {
                             .then(res => {
                                 onUpload(res.data.Hash);
                             })
-
                     })
-
-
             } catch (error) {
                 console.error('Error uploading image:', error);
             }
