@@ -9,7 +9,7 @@ const Header = () => {
             {/* Main header (navbar) */}
             <BetaBanner />
             <Navbar />
-            <ErrorBanner />
+            {/* <ErrorBanner /> */}
         </div>
     );
 };
