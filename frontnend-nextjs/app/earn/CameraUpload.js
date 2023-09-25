@@ -63,6 +63,9 @@ const CameraUpload = ({ isOpen, onClose, onUpload }) => {
     };
 
     if (!isOpen) return null;
+    const videoConstraints = {
+        facingMode: "environment"
+      };
 
     return (
         <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center bg-gray-800 bg-opacity-50">
@@ -77,6 +80,7 @@ const CameraUpload = ({ isOpen, onClose, onUpload }) => {
                                 audio={false}
                                 ref={webcamRef}
                                 screenshotFormat="image/jpeg"
+                                videoConstraints={videoConstraints}
                             // className="w-full h-full"
                             />
                         )}
