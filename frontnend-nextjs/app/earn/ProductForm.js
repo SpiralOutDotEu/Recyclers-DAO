@@ -1,22 +1,20 @@
 // components/ProductForm.js
 import React, { useState } from 'react';
-import Camera from 'react-html5-camera-photo';
 import BarcodeReader from 'react-barcode-reader';
-import PhotoShot from './PhotoShot';
+import CameraUpload from './CameraUpload';
 
 const ProductForm = () => {
     const [photo, setPhoto] = useState(null);
+    const [showCamera, setShowCamera] = useState(false);
+    const [imageCid, setImageCid] = useState('');
     const [barcode, setBarcode] = useState('');
     const [brand, setBrand] = useState('');
     const [material, setMaterial] = useState('Paper');
     const [isNew, setIsNew] = useState(true);
     const [isEthereumConnected, setIsEthereumConnected] = useState(false);
 
-    const handleTakePhoto = async () => {
-        // Use a library like react-camera to capture a photo
-        // and set it in the 'photo' state
-        // Example: const capturedPhoto = await capturePhoto();
-        // setPhoto(capturedPhoto);
+    const handleUpload = async (cid) => {
+        setImageCid(cid)
     };
 
     const handleRetakePhoto = () => {
@@ -37,7 +35,32 @@ const ProductForm = () => {
 
     return (
         <div className="p-4 bg-gray-100 rounded-lg shadow-lg">
-            <PhotoShot />
+            {/* <img src="https://gateway.lighthouse.storage/ipfs/QmPyDSQpRux8jtEUrV95MFbpAVhLWjKPmEX8tkHNdWJEgp"></img> */}
+            <div className="mb-4">
+                <label htmlFor="Image" className="block text-gray-700">
+                    Image Cid:
+                </label>
+                <div className="flex">
+                    <input
+                        type="text"
+                        id="image"
+                        value={imageCid}
+                        onChange={(e) => setImageCid(e.target.value)}
+                        className="w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:border-blue-500"
+                    />
+                    {showCamera ? (
+                        <CameraUpload onUpload={handleUpload} />
+                    ) : (
+                        <button
+                            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                            onClick={() => setShowCamera(true)}
+                        >
+                            Open Camera
+                        </button>
+                    )}
+                </div>
+            </div>
+
             <div className="mb-4">
                 <label htmlFor="barcode" className="block text-gray-700">
                     Barcode:
@@ -88,26 +111,26 @@ const ProductForm = () => {
                 </select>
             </div>
             <div className="mb-4">
-  <label className="block text-gray-700">Material Type:</label>
-  <div className="inline-block">
-    <div className="flex justify-between items-center">
-      <div className="flex items-center">
-        <span className="mr-2">New</span>
-        <label className="switch">
-          <input type="checkbox" checked={isNew} onChange={() => setIsNew(!isNew)} />
-          <span className="slider round"></span>
-        </label>
-      </div>
-      <div className="flex items-center">
-        <span className="mr-2">Waste</span>
-        <label className="switch">
-          <input type="checkbox" checked={!isNew} onChange={() => setIsNew(!isNew)} />
-          <span className="slider round"></span>
-        </label>
-      </div>
-    </div>
-  </div>
-</div>
+                <label className="block text-gray-700">Material Type:</label>
+                <div className="inline-block">
+                    <div className="flex justify-between items-center">
+                        <div className="flex items-center">
+                            <span className="mr-2">New</span>
+                            <label className="switch">
+                                <input type="checkbox" checked={isNew} onChange={() => setIsNew(!isNew)} />
+                                <span className="slider round"></span>
+                            </label>
+                        </div>
+                        <div className="flex items-center">
+                            <span className="mr-2">Waste</span>
+                            <label className="switch">
+                                <input type="checkbox" checked={!isNew} onChange={() => setIsNew(!isNew)} />
+                                <span className="slider round"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <button
                 onClick={handleSubmit}
