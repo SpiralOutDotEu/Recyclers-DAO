@@ -29,7 +29,7 @@ const Earn = () => {
         <li>Manage your account settings in your <a href="/profile" className="text-blue-600 hover:underline visited:text-purple-600">profile</a>.</li>
         <li>After submission, a validator must review your image.</li>
         <li>In a valid submission, both you and the validator will earn 0.01 freshly minted RDAO.</li>
-        <li>In an invalid submission, you will lose 0.01 RDAO, which will be transferred to the validator's account.</li>
+        <li>In an invalid submission, you will lose 0.01 RDAO, which will be transferred to the validator&apos;s account.</li>
       </ul>
     </div>
 

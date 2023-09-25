@@ -13,7 +13,7 @@ const Hero = () => {
                     We&apos;re on a mission to create the world&apos;s largest image database, powering image recognition and waste detection technologies to protect our environment.
                 </p>
                 <p className="text-lg md:text-xl mb-8">
-                    With our innovative DAO, contributing to the world's largest image database has never been easier. Simply take a photo of a product or waste using your smartphone, and you'll automatically earn tokens for your valuable contribution. Our decentralized platform empowers individuals to actively participate in building a comprehensive repository of images used for image identification and waste detection. By harnessing the collective efforts of our community, we're rewarding users for their environmental stewardship while simultaneously advancing cutting-edge technology for a cleaner and more sustainable future
+                    With our innovative DAO, contributing to the world&apos;s largest image database has never been easier. Simply take a photo of a product or waste using your smartphone, and you&apos;ll automatically earn tokens for your valuable contribution. Our decentralized platform empowers individuals to actively participate in building a comprehensive repository of images used for image identification and waste detection. By harnessing the collective efforts of our community, we&apos;re rewarding users for their environmental stewardship while simultaneously advancing cutting-edge technology for a cleaner and more sustainable future
                 </p>
                 <div className="flex justify-center">
                     <Image
