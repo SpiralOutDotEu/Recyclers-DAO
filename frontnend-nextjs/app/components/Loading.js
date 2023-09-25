@@ -1,5 +1,4 @@
 import React from 'react';
-import '../loading.css'; // Import your CSS file for styling
 
 const Loading = ({ visible }) => {
   // Use the "visible" prop to control the visibility of the loading component
@@ -8,8 +7,10 @@ const Loading = ({ visible }) => {
   }
 
   return (
-    <div className="loading-overlay">
-      <div className="loading-spinner"></div>
+    <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 bg-opacity-40 bg-white">
+      <div className="relative">
+        <div className="animate-spin rounded-full h-24 w-24 border-t-8 border-b-8 border-blue-500"></div>
+      </div>
     </div>
   );
 };
