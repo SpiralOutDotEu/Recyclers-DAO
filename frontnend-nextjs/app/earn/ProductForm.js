@@ -1,21 +1,31 @@
 // components/ProductForm.js
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import BarcodeReader from 'react-barcode-reader';
 import CameraUpload from './CameraUpload';
 
 const ProductForm = () => {
     const [photo, setPhoto] = useState(null);
-    const [showCamera, setShowCamera] = useState(false);
     const [imageCid, setImageCid] = useState('');
     const [barcode, setBarcode] = useState('');
     const [brand, setBrand] = useState('');
     const [material, setMaterial] = useState('Paper');
     const [isNew, setIsNew] = useState(true);
     const [isEthereumConnected, setIsEthereumConnected] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    
+
 
     const handleUpload = async (cid) => {
         setImageCid(cid)
     };
+
+    const openModal = () => {
+        setIsModalOpen(true);
+      };
+    
+      const closeModal = () => {
+        setIsModalOpen(false);
+      };
 
     const handleRetakePhoto = () => {
         setPhoto(null);
@@ -48,12 +58,12 @@ const ProductForm = () => {
                         onChange={(e) => setImageCid(e.target.value)}
                         className="w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:border-blue-500"
                     />
-                    {showCamera ? (
-                        <CameraUpload onUpload={handleUpload} />
+                    {isModalOpen ? (
+                        <CameraUpload onUpload={handleUpload} isOpen={isModalOpen} onClose={closeModal} />
                     ) : (
                         <button
                             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                            onClick={() => setShowCamera(true)}
+                            onClick={() => openModal()}
                         >
                             Open Camera
                         </button>
