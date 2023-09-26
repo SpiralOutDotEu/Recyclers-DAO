@@ -21,6 +21,7 @@ const Earn = () => {
     <div className="bg-blue-100 p-4 mb-4 rounded-lg">
       <h2 className="text-gray-800 text-xl font-semibold mb-2">How to Earn</h2>
       <p className="text-gray-600">
+        You can earn tokens by providing images of products or by checking and validating others submissions.<br></br>
         To participate in the image submission process and earn rewards, follow these steps:
       </p>
       <ul className="list-disc pl-6 text-gray-600">
