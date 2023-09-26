@@ -83,7 +83,7 @@ const Navbar = () => {
                         </Link>
                     </li>
                     <li>
-                        <Link href="/Governance" className="flex flex-col items-center">
+                        <Link href="/governance" className="flex flex-col items-center">
                             <HiOutlineBuildingLibrary className='text-2xl' />
                             <span> Governance</span>
                         </Link>
