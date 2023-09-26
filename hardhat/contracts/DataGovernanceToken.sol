@@ -174,7 +174,7 @@ contract DataGovernanceToken is
 
         } else {
             stakedBalances[submissions[submissionId]] -= 0.01 ether;
-            stakedBalances[msg.sender] -= 0.01 ether;
+            stakedBalances[msg.sender] += 0.01 ether;
             emit DataRejection(submissionId, submissions[submissionId], msg.sender, comment);
         }
     }

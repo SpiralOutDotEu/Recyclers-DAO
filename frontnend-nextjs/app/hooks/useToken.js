@@ -69,7 +69,7 @@ const useToken = () => {
             setLoading(true);
             const signer = await userProvider.getSigner()
             const tokenContract = new ethers.Contract(tokenAddress, tokenAbi, signer);
-            const type = "New" ? isNew : "Waste"
+            const type = isNew ? "New" : "Waste"
             const tx = await tokenContract.submitData(imageCid, material,type, brand, barcode);
             await tx.wait(); // Wait for transaction confirmation
             return true;
@@ -79,6 +79,22 @@ const useToken = () => {
             setLoading(false);
         }
     };
+
+        // Function to submit data
+        const validateData = async (submissionId, vote , comment, userProvider) => {
+            try {
+                setLoading(true);
+                const signer = await userProvider.getSigner()
+                const tokenContract = new ethers.Contract(tokenAddress, tokenAbi, signer);
+                const tx = await tokenContract.validateData(submissionId, vote , comment);
+                await tx.wait(); // Wait for transaction confirmation
+                return true;
+            } catch (error) {
+                setError(error.message);
+            } finally {
+                setLoading(false);
+            }
+        };
 
     // Function to stake tokens
     const stakeTokens = async (amountInWei, userProvider) => {
@@ -141,6 +157,7 @@ const useToken = () => {
         decreaseStake,
         purchaseTokens,
         submitData,
+        validateData,
     };
 };
 

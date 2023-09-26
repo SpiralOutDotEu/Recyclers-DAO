@@ -1,23 +1,69 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
+import useToken from '../hooks/useToken';
+import { ethers } from 'ethers';
+import Loading from '../components/Loading';
+import Success from '../components/Success'
+import Error from '../components/Error'
 
 const ValidationModal = ({ rowData, onClose }) => {
   const [comment, setComment] = useState('');
+  const [showSuccess, setShowSuccess] = useState(null);
+  const [showError, setShowError] = useState(null);
+  const { loading, error, validateData } = useToken();
+  const [submissionId, setSubmissionId] = useState('');
+
+  // Process the data to find the submission ID
+  useEffect(() => {
+    for (const [key, value] of Object.entries(rowData)) {
+      if (key === 'id') {
+        setSubmissionId(value);
+        break; // Stop searching after finding the submission ID
+      }
+    }
+  }, [rowData]);
 
   // Handle approve action
   const handleApprove = () => {
-    // Implement your logic for approve action here
-    // You can use the comment state as well as rowData to send data to your backend
-    // Don't forget to close the modal afterwards
-    onClose();
+    if (window.ethereum == null) {
+      setError("No Browser wallet detected");
+      alert("You need an ethereum wallet")
+      return
+    } else {
+      const userProvider = new ethers.BrowserProvider(window.ethereum)
+      const onSubmit = async (submissionId, vote, comment, userProvider) => {
+        const success = await validateData(submissionId, vote, comment, userProvider);
+        if (success) {
+          setShowSuccess("Approved Data Successful!");
+        } else {
+          setShowError("Error! something went wrong" + error)
+        }
+      };
+      onSubmit(submissionId, true, comment, userProvider)
+    }
+    
   };
 
   // Handle reject action
   const handleReject = () => {
-    // Implement your logic for reject action here
-    // You can use the comment state as well as rowData to send data to your backend
-    // Don't forget to close the modal afterwards
-    onClose();
+    if (window.ethereum == null) {
+      setError("No Browser wallet detected");
+      alert("You need an ethereum wallet")
+      return
+    } else {
+      const userProvider = new ethers.BrowserProvider(window.ethereum)
+      const onSubmit = async (submissionId, vote, comment, userProvider) => {
+        const success = await validateData(submissionId, vote, comment, userProvider);
+        if (success) {
+          setShowSuccess("Rejected Data Successful!");
+          
+        } else {
+          setShowError("Error! something went wrong" + error)
+        }
+      };
+      onSubmit(submissionId, false, comment, userProvider)
+    }
+    
   };
 
   const displayImage = rowData.imagecid ? (
@@ -27,7 +73,7 @@ const ValidationModal = ({ rowData, onClose }) => {
         alt="Image"
         width={250}
         height={250}
-        className="max-w-full h-auto mx-auto"
+        className="max-w-full max-w-full h-auto w-auto mx-auto"
       />
     </div>
   ) : null;
@@ -81,6 +127,13 @@ const ValidationModal = ({ rowData, onClose }) => {
           </button>
         </div>
       </div>
+      {showSuccess && (
+        <Success message={showSuccess} onClose={() => { onClose(); setShowSuccess(false)}} />
+      )}
+      {showError && (
+        <Error message={showError} onClose={() => setShowError(false)} />
+      )}
+      <Loading visible={loading} />
     </div>
   );
 };
