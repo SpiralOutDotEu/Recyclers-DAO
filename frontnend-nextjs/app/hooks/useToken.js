@@ -63,6 +63,23 @@ const useToken = () => {
         fetchData();
     }, [walletAddress]);
 
+    // Function to submit data
+    const submitData = async (imageCid, material, isNew, brand, barcode, userProvider) => {
+        try {
+            setLoading(true);
+            const signer = await userProvider.getSigner()
+            const tokenContract = new ethers.Contract(tokenAddress, tokenAbi, signer);
+            const type = "New" ? isNew : "Waste"
+            const tx = await tokenContract.submitData(imageCid, material,type, brand, barcode);
+            await tx.wait(); // Wait for transaction confirmation
+            return true;
+        } catch (error) {
+            setError(error.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     // Function to stake tokens
     const stakeTokens = async (amountInWei, userProvider) => {
         try {
@@ -123,6 +140,7 @@ const useToken = () => {
         stakeTokens,
         decreaseStake,
         purchaseTokens,
+        submitData,
     };
 };
 
