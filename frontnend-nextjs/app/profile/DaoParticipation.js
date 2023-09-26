@@ -101,14 +101,22 @@ const DaoParticipation = () => {
       <Loading visible={loading} />
       <div className="bg-blue-100 p-4 mb-4">
         <p>
-          To participate in the DAO and earn tokens, you need to stake 10 RDAO tokens. You can directly purchase and stake them below. The purchase price is {tokenPriceInEther} Ether.
+          To participate in the DAO and earn tokens, you need to stake 10 $ReDAO tokens. You can directly purchase and stake them below. The purchase price is {tokenPriceInEther} tFil per each $ReDao.
+          If you need some $tFil go and get from this <a
+            href="https://faucet.calibration.fildev.network/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-500 mt-2"
+          >
+           Filecoin Calibration Testnet Faucet
+          </a>
         </p>
       </div>
       <div className="mb-4">
         <p className="text-lg font-semibold">
           Your Balances
         </p>
-        <p>Your balance is {ethereumBalance} Ether and {unStakedBalance} RDAO.</p>
+        <p>Your balance is {ethereumBalance} $tFil and {unStakedBalance} $ReDAO.</p>
       </div>
       <div className="mb-4">
         <label className="block mb-2 font-semibold">Your Purchase Amount:</label>
@@ -126,7 +134,7 @@ const DaoParticipation = () => {
       </div>
       <div className="mb-4">
         <p className="text-lg font-semibold">Your Staked Amount</p>
-        <p>Your staked amount is {stakedBalance} RDAO.</p>
+        <p>Your staked amount is {stakedBalance} $ReDAO.</p>
         <div className="flex space-x-2">
           <div>
             <label className="block mb-2 font-semibold">Increase Stake:</label>
