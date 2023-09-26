@@ -7,6 +7,7 @@ import { AiOutlineHome } from 'react-icons/ai'
 import { CgProfile } from 'react-icons/cg'
 import { PiHandCoinsDuotone } from 'react-icons/pi'
 import { HiOutlineBuildingLibrary } from 'react-icons/hi2'
+import { FaRecycle } from 'react-icons/fa';
 
 
 const Navbar = () => {
@@ -26,7 +27,10 @@ const Navbar = () => {
             <div className="container mx-auto flex justify-between items-center">
                 <div className="flex items-center space-x-4 text-white text-3xl font-bold">
                     <Link href="/">
-                        Recyclers DAO
+                        <div className="flex items-center space-x-2">
+                            <FaRecycle className="h-16 w-16 text-white" />
+                            <span>Recyclers DAO</span>
+                        </div>
                     </Link>
                 </div>
                 {/* Mobile menu */}
